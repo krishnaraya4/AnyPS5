@@ -278,8 +278,12 @@ void ReportPreparedAtUse(const ShaderSnapshot& snapshot, const ShaderRecompiler:
         if (!snapshot.prepared->deferred) APS5_LOG_ERR("Shader 0x%llx stage %u has no artifact prepared at registration for the state of this draw or dispatch; preparing it at use", static_cast<unsigned long long>(request.shader.codeAddress), static_cast<std::uint32_t>(request.shader.stage));
         return;
     }
-    if (snapshot.type != 0 || request.shader.stage != ShaderRecompiler::ShaderStage::Compute) throw std::runtime_error("AGC driver: unregistered program is not a compute shader");
-    APS5_LOG_ERR("Compute shader 0x%llx was not registered; preparing its artifact at dispatch", static_cast<unsigned long long>(snapshot.codeAddress));
+    if (request.shader.stage == ShaderRecompiler::ShaderStage::Compute) {
+        if (snapshot.type != 0) throw std::runtime_error("AGC driver: unregistered program is not a compute shader");
+        APS5_LOG_ERR("Compute shader 0x%llx was not registered; preparing its artifact at dispatch", static_cast<unsigned long long>(snapshot.codeAddress));
+        return;
+    }
+    APS5_LOG_ERR("Graphics shader 0x%llx was not registered; preparing its artifact at first use", static_cast<unsigned long long>(snapshot.codeAddress));
 }
 
 }
