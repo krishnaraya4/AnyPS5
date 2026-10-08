@@ -84,7 +84,8 @@ struct ShaderSnapshot {
 };
 
 
-std::shared_ptr<const ShaderSnapshot> ReadRawComputeShader(std::uint64_t address);
+std::shared_ptr<const ShaderSnapshot> ReadRawShader(std::uint64_t address);
+std::shared_ptr<const ShaderSnapshot> ProgramSnapshot(const ShaderRegistry& shaders, std::uint64_t address, std::initializer_list<std::uint8_t> types);
 
 std::shared_ptr<const ShaderRecompiler::SourceHandle> PrepareShaderWithDiagnostics(const ShaderRecompiler::RecompileRequest& request, ShaderRecompiler::ShaderPreparationContext* preparation = nullptr);
 
