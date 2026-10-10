@@ -58,6 +58,8 @@ int main() {
     Require(pthread_kill_nid_postfix(scePthreadSelf(), 200) == 22);
     Require(pthread_kill_nid_postfix(scePthreadSelf(), -1) == 22);
     Require(pthread_kill_nid_postfix(nullptr, 15) == 3);
+    Require(pthread_kill_nid_postfix(nullptr, 128) == 3);
+    Require(pthread_kill_nid_postfix(nullptr, 129) == 22);
     bool threw = false;
     try { pthread_kill_nid_postfix(reinterpret_cast<void*>(std::uintptr_t{0x10}), 15); }
     catch (const std::runtime_error&) { threw = true; }

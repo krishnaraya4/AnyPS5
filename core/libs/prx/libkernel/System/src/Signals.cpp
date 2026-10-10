@@ -1,5 +1,6 @@
 #include "SceTypes.hpp"
 #include "prx/libc/include/General.hpp"
+#include "prx/libkernel/Pthread/Posix/Common.hpp"
 #include "prx/libc/include/general/VabiMacros.hpp"
 #include <atomic>
 #include <chrono>
@@ -203,8 +204,8 @@ int APS5_VABI kill_nid_postfix(int pid, int guest) {
     return guest == 0 ? 0 : raise_nid_postfix(guest);
 }
 int APS5_VABI pthread_kill_nid_postfix(Pthread thread, int guest) {
-    if (guest < 0 || guest > MaxSignal) return 22;
-    if (thread == nullptr) return 3;
+    if (guest < 0 || guest > MaxSignal) return PosixThread::GUEST_EINVAL;
+    if (thread == nullptr) return PosixThread::GUEST_ESRCH;
     if (guest == 0) return 0;
     if (thread != scePthreadSelf()) NotImplemented_nid_no_patch(("pthread_kill signal " + std::to_string(guest) + " to another thread").c_str());
     return raise_nid_postfix(guest) == 0 ? 0 : *__error_nid_postfix();
