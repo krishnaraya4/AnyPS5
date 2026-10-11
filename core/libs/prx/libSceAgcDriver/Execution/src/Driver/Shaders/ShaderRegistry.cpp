@@ -11,6 +11,7 @@
 #include "CompiledVariant.hpp"
 #include "Optimization/ResourceProgram.hpp"
 #include <algorithm>
+#include <atomic>
 #include <condition_variable>
 #include <cstdio>
 #include <cstddef>
@@ -105,7 +106,20 @@ std::shared_ptr<const ShaderSnapshot> ReadRawShader(std::uint64_t address) {
 
 std::shared_ptr<const ShaderSnapshot> ProgramSnapshot(const ShaderRegistry& shaders, std::uint64_t address, std::initializer_list<std::uint8_t> types) {
     if (auto registered = RegisteredProgram(shaders, address, types)) return registered;
+    require(shaders.empty(), "graphics program does not belong to a compatible registered shader");
     return ReadRawShader(address);
+}
+
+namespace {
+std::atomic<bool> rawGraphicsDrawn{false};
+}
+
+void NoteRawGraphicsDraw() {
+    rawGraphicsDrawn.store(true, std::memory_order_relaxed);
+}
+
+bool RawGraphicsDrawn() {
+    return rawGraphicsDrawn.load(std::memory_order_relaxed);
 }
 
 namespace {
@@ -965,6 +979,7 @@ void Driver::RegisterShader(const Shader* shader) {
     PerformanceTimer timing("Shader.Register");
     ShaderPreparationTransaction transaction;
     CheckFailure();
+    require(!RawGraphicsDrawn(), "a shader was registered after graphics programs were drawn without registration");
     GuestMemory::CheckRange(shader, sizeof(Shader), 1);
     Shader fields;
     std::memcpy(&fields, static_cast<const void*>(shader), sizeof(Shader));
