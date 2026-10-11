@@ -813,7 +813,7 @@ static std::int64_t TransferIovecs(int d, const KernelIovec* iov, int iovcnt, co
     if (offset == nullptr && d >= GuestSockets::FirstDescriptor) {
         const auto result = write ? GuestSockets::Writev(d, reinterpret_cast<const GuestSockets::Iovec*>(iov), iovcnt)
                                   : GuestSockets::Readv(d, reinterpret_cast<const GuestSockets::Iovec*>(iov), iovcnt);
-        return result < 0 ? SceErrorFromErrno(*__error_nid_postfix()) : result;
+        return result < 0 ? SceKernelError(*__error_nid_postfix()) : result;
     }
     if (!write && File::IsRandomDevice(d)) return ReadRandomIovecs(d, iov, iovcnt);
     if (total == 0) {
@@ -878,7 +878,7 @@ int64_t APS5_VABI sceKernelReadv(int d, const KernelIovec* iov, int iovcnt) {
     if (!OpenIovecs(iov, iovcnt, destinations)) return SceErrorFromErrno(GUEST_EFAULT);
     if (d >= GuestSockets::FirstDescriptor) {
         const auto result = GuestSockets::Readv(d, reinterpret_cast<const GuestSockets::Iovec*>(iov), iovcnt);
-        return result < 0 ? SceErrorFromErrno(*__error_nid_postfix()) : result;
+        return result < 0 ? SceKernelError(*__error_nid_postfix()) : result;
     }
     if (File::IsRandomDevice(d)) return ReadRandomIovecs(d, iov, iovcnt);
     const auto result = static_cast<std::int64_t>(::readv(d, NativeIovecs(iov), iovcnt));
@@ -889,7 +889,7 @@ int64_t APS5_VABI sceKernelWritev(int d, const KernelIovec* iov, int iovcnt) {
     if (const int error = CheckIovecs(iov, iovcnt)) return error;
     if (d >= GuestSockets::FirstDescriptor) {
         const auto result = GuestSockets::Writev(d, reinterpret_cast<const GuestSockets::Iovec*>(iov), iovcnt);
-        return result < 0 ? SceErrorFromErrno(*__error_nid_postfix()) : result;
+        return result < 0 ? SceKernelError(*__error_nid_postfix()) : result;
     }
     const auto result = static_cast<std::int64_t>(::writev(d, NativeIovecs(iov), iovcnt));
     return result < 0 ? SceErrorFromErrno(errno) : result;

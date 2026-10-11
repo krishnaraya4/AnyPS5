@@ -119,6 +119,8 @@ int main() {
     *__error_nid_postfix() = 0;
     Require(read_nid_postfix(server, received, sizeof(received)) == -1 && *__error_nid_postfix() == 35);
     Require(sceKernelRead(server, received, sizeof(received)) == KernelAgain);
+    Iovec emptyRead[] = {{received, sizeof(received)}};
+    Require(sceKernelReadv(server, emptyRead, 1) == KernelAgain);
 
     Require(read_nid_postfix(server, received, 0) == 0 && sceKernelRead(server, received, 0) == 0);
     Require(close_nid_postfix(client) == 0);
